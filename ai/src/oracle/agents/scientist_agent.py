@@ -1,4 +1,4 @@
-"""Citizen expert agent for ORACLE."""
+"""Scientist expert agent for ORACLE."""
 import logging
 
 from langchain_core.messages import HumanMessage, SystemMessage, ToolMessage
@@ -13,14 +13,14 @@ logger = logging.getLogger(__name__)
 
 MAX_TOOL_ROUNDS = 2
 
-SYSTEM_PROMPT = """You are the CITIZEN AGENT on the ORACLE deliberation council, representing the lived experience and interests of ordinary people affected by the decision.
+SYSTEM_PROMPT = """You are the SCIENTIST AGENT on the ORACLE deliberation council, an expert in scientific evidence, empirical research, and data interpretation.
 
 The scenario to analyze comes from state["scenario_analysis"] in the user message.
 
-Be critical and independent. Do not defer to other experts. Focus on social equity, fairness of burden and benefit distribution, public opinion, community wellbeing, and impacts on vulnerable groups. Only support a course of action when it is fair, transparent, and acceptable to the people it affects. Use search_latest_data to ground your analysis in current data when relevant.
+Be critical and independent. Do not defer to other experts. Assess the quality and relevance of available evidence, identify gaps and uncertainties, distinguish correlation from causation, and only support a course of action when it is consistent with the scientific record. Use search_latest_data to ground your analysis in current data when relevant.
 
 Produce your final answer through the required structured output schema:
-- analysis: str — detailed social impact analysis paragraph
+- analysis: str — detailed scientific evidence analysis paragraph
 - key_risks: list[str] — 3-5 risk bullets
 - recommendations: list[str] — 3-5 actionable recommendations
 - confidence: float — 0.0 to 1.0
@@ -28,8 +28,8 @@ Produce your final answer through the required structured output schema:
 - evidence_used: list[str] — sources or tool results you referenced"""
 
 
-class CitizenOpinion(BaseModel):
-    """Structured output schema for the citizen agent."""
+class ScientistOpinion(BaseModel):
+    """Structured output schema for the scientist agent."""
     analysis: str
     key_risks: list[str]
     recommendations: list[str]
@@ -41,8 +41,8 @@ class CitizenOpinion(BaseModel):
 def _fallback_opinion(error: str) -> dict:
     """Return a neutral opinion when analysis fails."""
     return {
-        "analysis": f"Citizen analysis unavailable ({error}).",
-        "key_risks": ["Unable to assess social risks."],
+        "analysis": f"Scientific analysis unavailable ({error}).",
+        "key_risks": ["Unable to assess evidence-based risks."],
         "recommendations": ["Re-run deliberation once the model is reachable."],
         "confidence": 0.0,
         "stance": "neutral",
@@ -50,8 +50,8 @@ def _fallback_opinion(error: str) -> dict:
     }
 
 
-def citizen_agent(state: OracleState) -> OracleState:
-    """Analyze the scenario from a social equity and public impact perspective."""
+def scientist_agent(state: OracleState) -> OracleState:
+    """Analyze the scenario from a scientific evidence perspective."""
     try:
         llm = ChatOpenAI(model="gpt-4o", api_key=settings.OPENAI_API_KEY, temperature=0)
         tool_model = llm.bind_tools(general_tools)
@@ -72,12 +72,12 @@ def citizen_agent(state: OracleState) -> OracleState:
                     ToolMessage(content=str(result), tool_call_id=call["id"])
                 )
             response = tool_model.invoke(messages)
-        opinion_model = llm.with_structured_output(CitizenOpinion)
+        opinion_model = llm.with_structured_output(ScientistOpinion)
         opinion = opinion_model.invoke(messages).model_dump()
     except Exception as e:
-        logger.exception("Citizen agent failed")
+        logger.exception("Scientist agent failed")
         opinion = _fallback_opinion(str(e))
     return {
         **state,
-        "expert_opinions": {**state.get("expert_opinions", {}), "citizen": opinion},
+        "expert_opinions": {**state.get("expert_opinions", {}), "scientist": opinion},
     }
