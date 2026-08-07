@@ -1,7 +1,11 @@
 fastapi
-uvicorn[standard]
-pydantic
+uvicorn
+pydantic-settings
 python-dotenv
 langchain
-openai
+langchain-openai
+langchain-community
 langgraph
+openai
+tavily-python
+requests

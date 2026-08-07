@@ -1,14 +1,20 @@
 """State models for ORACLE.
 
-Define global state representations used by agents and the graph. Kept minimal
-and Pydantic-based for validation and forward-compatibility.
+Define global state representations used by agents and the graph.
 """
-from pydantic import BaseModel
+from typing import TypedDict, Annotated
+import operator
 
 
-class State(BaseModel):
-    """Global runtime state placeholder.
-
-    Extend this model with the actual state fields when implementing business logic.
-    """
-    pass
+class OracleState(TypedDict):
+    user_input: str
+    scenario_analysis: dict
+    expert_opinions: Annotated[dict, operator.or_]
+    consensus: dict
+    iteration_count: int
+    max_iterations: int
+    needs_iteration: bool
+    judge_verdict: dict
+    explanation: dict
+    final_response: str
+    messages: list
