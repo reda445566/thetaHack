@@ -1,204 +1,264 @@
-"use client"
+"use client";
 
-import * as React from "react"
+import * as React from "react";
 
-import { NavDocuments } from "@/components/nav-documents"
-import { NavMain } from "@/components/nav-main"
-import { NavSecondary } from "@/components/nav-secondary"
-import { NavUser } from "@/components/nav-user"
+import { NavUser } from "@/components/nav-user";
+import { Label } from "@/components/ui/label";
 import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
+  SidebarGroup,
+  SidebarGroupContent,
   SidebarHeader,
+  SidebarInput,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-} from "@/components/ui/sidebar"
-import { SquaresFourIcon, ListIcon, ChartBarIcon, FolderIcon, UsersIcon, CameraIcon, FileTextIcon, GearIcon, QuestionIcon, MagnifyingGlassIcon, DatabaseIcon, ChartLineIcon, FileIcon, CommandIcon } from "@phosphor-icons/react"
+  SidebarTrigger,
+  useSidebar,
+} from "@/components/ui/sidebar";
+import { Switch } from "@/components/ui/switch";
+import {
+  TrayIcon,
+  FileIcon,
+  PaperPlaneTiltIcon,
+  ArchiveIcon,
+  TrashIcon,
+  CommandIcon,
+  Eye,
+} from "@phosphor-icons/react";
+import { ModeToggle } from "./ModeToggle";
+import Link from "next/link";
 
+// This is sample data
 const data = {
   user: {
-    name: "shadcn",
-    email: "m@example.com",
-    avatar: "/avatars/shadcn.jpg",
+    name: "Apolo",
+    email: "Admin@Orcle.com",
+    avatar: "/example.png",
   },
   navMain: [
     {
-      title: "Dashboard",
+      title: "Inbox",
       url: "#",
-      icon: (
-        <SquaresFourIcon
-        />
-      ),
-    },
-    {
-      title: "Lifecycle",
-      url: "#",
-      icon: (
-        <ListIcon
-        />
-      ),
-    },
-    {
-      title: "Analytics",
-      url: "#",
-      icon: (
-        <ChartBarIcon
-        />
-      ),
-    },
-    {
-      title: "Projects",
-      url: "#",
-      icon: (
-        <FolderIcon
-        />
-      ),
-    },
-    {
-      title: "Team",
-      url: "#",
-      icon: (
-        <UsersIcon
-        />
-      ),
-    },
-  ],
-  navClouds: [
-    {
-      title: "Capture",
-      icon: (
-        <CameraIcon
-        />
-      ),
+      icon: <TrayIcon />,
       isActive: true,
-      url: "#",
-      items: [
-        {
-          title: "Active Proposals",
-          url: "#",
-        },
-        {
-          title: "Archived",
-          url: "#",
-        },
-      ],
     },
     {
-      title: "Proposal",
-      icon: (
-        <FileTextIcon
-        />
-      ),
+      title: "Drafts",
       url: "#",
-      items: [
-        {
-          title: "Active Proposals",
-          url: "#",
-        },
-        {
-          title: "Archived",
-          url: "#",
-        },
-      ],
+      icon: <FileIcon />,
+      isActive: false,
     },
     {
-      title: "Prompts",
-      icon: (
-        <FileTextIcon
-        />
-      ),
+      title: "Sent",
       url: "#",
-      items: [
-        {
-          title: "Active Proposals",
-          url: "#",
-        },
-        {
-          title: "Archived",
-          url: "#",
-        },
-      ],
+      icon: <PaperPlaneTiltIcon />,
+      isActive: false,
+    },
+    {
+      title: "Junk",
+      url: "#",
+      icon: <ArchiveIcon />,
+      isActive: false,
+    },
+    {
+      title: "Trash",
+      url: "#",
+      icon: <TrashIcon />,
+      isActive: false,
     },
   ],
-  navSecondary: [
+  mails: [
     {
-      title: "Settings",
-      url: "#",
-      icon: (
-        <GearIcon
-        />
-      ),
+      name: "William Smith",
+      email: "williamsmith@example.com",
+      subject: "Meeting Tomorrow",
+      date: "09:34 AM",
+      teaser:
+        "Hi team, just a reminder about our meeting tomorrow at 10 AM.\nPlease come prepared with your project updates.",
     },
     {
-      title: "Get Help",
-      url: "#",
-      icon: (
-        <QuestionIcon
-        />
-      ),
+      name: "Alice Smith",
+      email: "alicesmith@example.com",
+      subject: "Re: Project Update",
+      date: "Yesterday",
+      teaser:
+        "Thanks for the update. The progress looks great so far.\nLet's schedule a call to discuss the next steps.",
     },
     {
-      title: "Search",
-      url: "#",
-      icon: (
-        <MagnifyingGlassIcon
-        />
-      ),
+      name: "Bob Johnson",
+      email: "bobjohnson@example.com",
+      subject: "Weekend Plans",
+      date: "2 days ago",
+      teaser:
+        "Hey everyone! I'm thinking of organizing a team outing this weekend.\nWould you be interested in a hiking trip or a beach day?",
+    },
+    {
+      name: "Emily Davis",
+      email: "emilydavis@example.com",
+      subject: "Re: Question about Budget",
+      date: "2 days ago",
+      teaser:
+        "I've reviewed the budget numbers you sent over.\nCan we set up a quick call to discuss some potential adjustments?",
+    },
+    {
+      name: "Michael Wilson",
+      email: "michaelwilson@example.com",
+      subject: "Important Announcement",
+      date: "1 week ago",
+      teaser:
+        "Please join us for an all-hands meeting this Friday at 3 PM.\nWe have some exciting news to share about the company's future.",
+    },
+    {
+      name: "Sarah Brown",
+      email: "sarahbrown@example.com",
+      subject: "Re: Feedback on Proposal",
+      date: "1 week ago",
+      teaser:
+        "Thank you for sending over the proposal. I've reviewed it and have some thoughts.\nCould we schedule a meeting to discuss my feedback in detail?",
+    },
+    {
+      name: "David Lee",
+      email: "davidlee@example.com",
+      subject: "New Project Idea",
+      date: "1 week ago",
+      teaser:
+        "I've been brainstorming and came up with an interesting project concept.\nDo you have time this week to discuss its potential impact and feasibility?",
+    },
+    {
+      name: "Olivia Wilson",
+      email: "oliviawilson@example.com",
+      subject: "Vacation Plans",
+      date: "1 week ago",
+      teaser:
+        "Just a heads up that I'll be taking a two-week vacation next month.\nI'll make sure all my projects are up to date before I leave.",
+    },
+    {
+      name: "James Martin",
+      email: "jamesmartin@example.com",
+      subject: "Re: Conference Registration",
+      date: "1 week ago",
+      teaser:
+        "I've completed the registration for the upcoming tech conference.\nLet me know if you need any additional information from my end.",
+    },
+    {
+      name: "Sophia White",
+      email: "sophiawhite@example.com",
+      subject: "Team Dinner",
+      date: "1 week ago",
+      teaser:
+        "To celebrate our recent project success, I'd like to organize a team dinner.\nAre you available next Friday evening? Please let me know your preferences.",
     },
   ],
-  documents: [
-    {
-      name: "Data Library",
-      url: "#",
-      icon: (
-        <DatabaseIcon
-        />
-      ),
-    },
-    {
-      name: "Reports",
-      url: "#",
-      icon: (
-        <ChartLineIcon
-        />
-      ),
-    },
-    {
-      name: "Word Assistant",
-      url: "#",
-      icon: (
-        <FileIcon
-        />
-      ),
-    },
-  ],
-}
+};
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  // Note: I'm using state to show active item.
+  // IRL you should use the url/router.
+  const [activeItem, setActiveItem] = React.useState(data.navMain[0]);
+  const [mails, setMails] = React.useState(data.mails);
+  const { setOpen } = useSidebar();
   return (
-    <Sidebar collapsible="offcanvas" {...props}>
-      <SidebarHeader>
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton
-              className="data-[slot=sidebar-menu-button]:p-1.5!"
-              render={<a href="#" />}
-            >
-              <CommandIcon className="size-5!" />
-              <span className="text-base font-semibold">Acme Inc.</span>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
-      </SidebarHeader>
-      <SidebarContent>
-        <NavMain items={data.navMain} />
-        <NavDocuments items={data.documents} />
-        <NavSecondary items={data.navSecondary} className="mt-auto" />
-      </SidebarContent>
-      <SidebarFooter>
-        <NavUser user={data.user} />
-      </SidebarFooter>
+    <Sidebar
+      collapsible="icon"
+      className="overflow-hidden *:data-[sidebar=sidebar]:flex-row"
+      {...props}
+    >
+      {/* This is the first sidebar */}
+      {/* We disable collapsible and adjust width to icon. */}
+      {/* This will make the sidebar appear as icons. */}
+      <Sidebar
+        collapsible="none"
+        className="w-[calc(var(--sidebar-width-icon)+1px)]! border-e"
+      >
+        <SidebarHeader>
+          <SidebarMenu>
+            <SidebarTrigger />
+          </SidebarMenu>
+        </SidebarHeader>
+        <SidebarContent>
+          <SidebarGroup>
+            <SidebarGroupContent className="px-1.5 md:px-0">
+              <SidebarMenu>
+                {data.navMain.map((item) => (
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton
+                      tooltip={{
+                        children: item.title,
+                        hidden: false,
+                      }}
+                      onClick={() => {
+                        setActiveItem(item);
+                        const mail = data.mails.sort(() => Math.random() - 0.5);
+                        setMails(
+                          mail.slice(
+                            0,
+                            Math.max(5, Math.floor(Math.random() * 10) + 1),
+                          ),
+                        );
+                        setOpen(true);
+                      }}
+                      isActive={activeItem?.title === item.title}
+                      className="px-2.5 md:px-2"
+                    >
+                      {item.icon}
+                      <span>{item.title}</span>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))}
+                <ModeToggle />
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        </SidebarContent>
+        <SidebarFooter>
+          <NavUser user={data.user} />
+        </SidebarFooter>
+      </Sidebar>
+
+      {/* This is the second sidebar */}
+      {/* We disable collapsible and let it fill remaining space */}
+      <Sidebar collapsible="none" className="hidden flex-1 md:flex">
+        <SidebarHeader className="gap-3.5 border-b p-4">
+          <Link href="/" className="w-full flex items-center gap-2 text-lg font-medium text-foreground">
+            <Eye size={25} className="text-accent" />
+            <h1>Orcle</h1>
+          </Link>
+          <div className="flex w-full items-center justify-between">
+            <div className="text-base font-medium text-foreground">
+              {activeItem?.title}
+            </div>
+            <Label className="flex items-center gap-2 text-sm">
+              <span>Unreads</span>
+              <Switch className="shadow-none" />
+            </Label>
+          </div>
+          <SidebarInput placeholder="Type to search..." />
+        </SidebarHeader>
+        <SidebarContent>
+          <SidebarGroup className="px-0">
+            <SidebarGroupContent>
+              {mails.map((mail) => (
+                <a
+                  href="#"
+                  key={mail.email}
+                  className="flex flex-col items-start gap-2 border-b p-4 text-sm leading-tight whitespace-nowrap last:border-b-0 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+                >
+                  <div className="flex w-full items-center gap-2">
+                    <span>{mail.name}</span>{" "}
+                    <span className="ms-auto text-xs">{mail.date}</span>
+                  </div>
+                  <span className="font-medium">{mail.subject}</span>
+                  <span className="line-clamp-2 w-65 text-xs whitespace-break-spaces">
+                    {mail.teaser}
+                  </span>
+                </a>
+              ))}
+            </SidebarGroupContent>
+          </SidebarGroup>
+        </SidebarContent>
+      </Sidebar>
     </Sidebar>
-  )
+  );
 }
