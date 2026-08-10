@@ -74,6 +74,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             }
           >
             <AppSidebar />
+            <SidebarTrigger className="md:hidden text-5xl" size="lg" />
             <SidebarInset>{children}</SidebarInset>
           </SidebarProvider>
         </ThemeProvider>
