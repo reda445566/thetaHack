@@ -41,11 +41,20 @@ export const makeDecision = expressAsyncHandler(async (req, res) => {
     }
 
     try {
+        const reqHeaders = {
+            'Content-Type': 'application/json'
+        };
+        if (req.headers.cookie) reqHeaders['cookie'] = req.headers.cookie;
+        if (req.headers['x-vercel-protection-bypass']) {
+            reqHeaders['x-vercel-protection-bypass'] = req.headers['x-vercel-protection-bypass'];
+        }
+        if (req.headers['authorization']) {
+            reqHeaders['authorization'] = req.headers['authorization'];
+        }
+
         const aiResponse = await fetch(aiEndpoint, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
+            headers: reqHeaders,
             body: JSON.stringify({
                 problem_description: problemText.trim(),
                 user_input,
