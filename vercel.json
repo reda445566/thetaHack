@@ -1,0 +1,38 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "front-end/package.json",
+      "use": "@vercel/static-build",
+      "config": {
+        "distDir": "dist"
+      }
+    },
+    {
+      "src": "back-end/src/app.js",
+      "use": "@vercel/node"
+    },
+    {
+      "src": "ai/api/index.py",
+      "use": "@vercel/python"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "back-end/src/app.js"
+    },
+    {
+      "src": "/decide",
+      "dest": "ai/api/index.py"
+    },
+    {
+      "src": "/health",
+      "dest": "ai/api/index.py"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "front-end/$1"
+    }
+  ]
+}

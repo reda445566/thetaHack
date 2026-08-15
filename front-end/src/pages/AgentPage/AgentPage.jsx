@@ -56,7 +56,51 @@ export default function AgentPage() {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  function handleSend(text) {
+  function formatOracleResponse(data) {
+    if (!data) return "لا توجد تفاصيل متاحة للقرار.";
+
+    const {
+      final_decision,
+      decision_reasoning,
+      final_confidence = 0,
+      climate_analysis,
+      economy_analysis,
+      health_analysis,
+      citizen_perspective,
+      ethics_evaluation,
+    } = data;
+
+    const confidencePercent = Math.round((final_confidence || 0) * 100);
+
+    let reply = `### 🎯 القرار النهائي / Final Decision\n${final_decision || "تم اكتمال التحليل"}\n\n`;
+    reply += `**📊 نسبة الثقة:** ${confidencePercent}%\n\n`;
+
+    if (decision_reasoning) {
+      reply += `### 📝 سبب القرار والتحليل المجمل\n${decision_reasoning}\n\n`;
+    }
+
+    reply += `---\n### 📋 تحليلات الوكلاء المتخصصين:\n`;
+
+    if (climate_analysis) {
+      reply += `\n**🌍 المناخ والبيئة (Climate Analysis):**\n${climate_analysis}\n`;
+    }
+    if (economy_analysis) {
+      reply += `\n**💰 الاقتصاد والمالية (Economy Analysis):**\n${economy_analysis}\n`;
+    }
+    if (health_analysis) {
+      reply += `\n**❤️ الصحة العامة (Health Analysis):**\n${health_analysis}\n`;
+    }
+    if (citizen_perspective) {
+      reply += `\n**👥 رؤية المواطن (Citizen Perspective):**\n${citizen_perspective}\n`;
+    }
+    if (ethics_evaluation) {
+      reply += `\n**⚖️ التقييم الأخلاقي (Ethics Evaluation):**\n${ethics_evaluation}\n`;
+    }
+
+    return reply;
+  }
+
+  async function handleSend(text) {
     const content = (text ?? draft).trim();
     if (!content || isLoading) return;
 
@@ -66,13 +110,48 @@ export default function AgentPage() {
     setDraft("");
     setIsLoading(true);
 
-    setTimeout(() => {
-      const reply = MOCK_REPLIES[Math.floor(Math.random() * MOCK_REPLIES.length)];
+    try {
+      const backendUrl =
+        import.meta.env.VITE_API_URL ||
+        (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
+          ? "http://localhost:5000/api/v1/decide"
+          : "/api/v1/decide");
+      const response = await fetch(backendUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          problem_description: content,
+          language: "Arabic"
+        }),
+      });
+
+      const resData = await response.json();
+
+      if (!response.ok || resData.status !== "success") {
+        throw new Error(resData.message || resData.detail || "حدث خطأ أثناء التواصل مع محرك ORACLE");
+      }
+
+      const data = resData.data || {};
+      const reply = formatOracleResponse(data);
+
       setMessages((prev) =>
         prev.map((m) => (m.id === assistantMsg.id ? { ...m, content: reply, streaming: false } : m))
       );
+    } catch (err) {
+      setMessages((prev) =>
+        prev.map((m) =>
+          m.id === assistantMsg.id
+            ? {
+                ...m,
+                content: `❌ **عذراً، تعذر الاتصال بمحرك ORACLE AI:**\n${err.message}`,
+                streaming: false,
+              }
+            : m
+        )
+      );
+    } finally {
       setIsLoading(false);
-    }, 1100);
+    }
   }
 
   return (

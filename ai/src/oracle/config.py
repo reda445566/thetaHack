@@ -63,7 +63,7 @@ def get_chat_model(model: str, temperature: float = 0.7) -> Any:
             model=settings.NVIDIA_MODEL,
             temperature=temperature,
             timeout=settings.LLM_TIMEOUT_SECONDS,
-            max_retries=0,
+            max_retries=3,
         )
 
     if settings.ZAI_API_KEY and ChatOpenAI is not None:
@@ -75,7 +75,7 @@ def get_chat_model(model: str, temperature: float = 0.7) -> Any:
             model=settings.ZAI_MODEL,
             temperature=temperature,
             timeout=settings.LLM_TIMEOUT_SECONDS,
-            max_retries=0,
+            max_retries=3,
         )
 
     if settings.OPENROUTER_API_KEY and ChatOpenAI is not None:
@@ -89,7 +89,7 @@ def get_chat_model(model: str, temperature: float = 0.7) -> Any:
             model=settings.OPENROUTER_MODEL or "openai/gpt-4o-mini",
             temperature=temperature,
             timeout=settings.LLM_TIMEOUT_SECONDS,
-            max_retries=0,
+            max_retries=3,
         )
 
     if settings.OPENROUTER_API_KEY and ChatOpenRouter is not None:
@@ -98,7 +98,7 @@ def get_chat_model(model: str, temperature: float = 0.7) -> Any:
             model=settings.OPENROUTER_MODEL or "openai/gpt-4o-mini",
             temperature=temperature,
             timeout=settings.LLM_TIMEOUT_SECONDS,
-            max_retries=0,
+            max_retries=3,
         )
 
     if settings.OPENAI_API_KEY and ChatOpenAI is not None:
@@ -107,7 +107,7 @@ def get_chat_model(model: str, temperature: float = 0.7) -> Any:
             model=settings.OPENAI_MODEL or model,
             temperature=temperature,
             timeout=settings.LLM_TIMEOUT_SECONDS,
-            max_retries=0,
+            max_retries=3,
         )
 
     return None

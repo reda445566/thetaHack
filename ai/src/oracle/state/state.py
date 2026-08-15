@@ -15,6 +15,8 @@ class AgentResponse(BaseModel):
     reasoning: Optional[str] = None
 
 
+import re
+
 class State(BaseModel):
     """Complete runtime state for ORACLE multi-agent system."""
     
@@ -33,14 +35,22 @@ class State(BaseModel):
     @property
     def language_instruction(self) -> str:
         """Return a language directive for model prompts."""
-        if self.response_language:
+        lang = (self.response_language or "").strip()
+        text_to_check = f"{self.problem_description} {self.user_input}"
+        has_arabic = bool(re.search(r'[\u0600-\u06FF]', text_to_check))
+
+        if lang.lower() == "arabic" or (not lang and has_arabic):
             return (
-                f"Respond in {self.response_language}. "
-                "Use the same language for all answers and explanations."
+                "IMPORTANT LANGUAGE DIRECTIVE: The problem is in Arabic. You MUST write your ENTIRE response "
+                "(all headings, bullet points, sections, and explanations) completely in Arabic (باللغة العربية)."
+            )
+        elif lang:
+            return (
+                f"IMPORTANT LANGUAGE DIRECTIVE: Write your ENTIRE response completely in {lang}."
             )
         return (
-            "Respond in the same language as the problem description. "
-            "If the problem is in Arabic, answer in Arabic; if it is in English, answer in English."
+            "IMPORTANT LANGUAGE DIRECTIVE: Respond in the same language as the problem description. "
+            "If the problem is in Arabic, answer in Arabic. If in English, answer in English."
         )
     
     # Agent responses
