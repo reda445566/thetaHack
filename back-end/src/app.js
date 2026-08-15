@@ -18,16 +18,19 @@ app.set('trust proxy', true); // for get real ip
 
 
 ////////////////////////////////////////////////////  cors
-const allowedOrigins = (process.env.ORIGINS || "").split(',').filter(Boolean);
+const allowedOrigins = (process.env.ORIGINS || "").split(',').map(o => o.trim()).filter(Boolean);
 app.use(cors({
     origin: (origin, callBack) => {
-        if (!origin || allowedOrigins.length === 0 || allowedOrigins.includes(origin)) 
-            return callBack(null, true)
-        
-        else return callBack(new Error("NOT allowed by CORS"))
+        if (!origin) return callBack(null, true);
+        if (origin.endsWith('.vercel.app')) return callBack(null, true);
+        if (origin.includes('localhost') || origin.includes('127.0.0.1')) return callBack(null, true);
+        if (allowedOrigins.length === 0 || allowedOrigins.includes(origin)) {
+            return callBack(null, true);
+        }
+        return callBack(new Error("NOT allowed by CORS"));
     },
-    methods:["POST", "GET", "PUT", "PATCH","DELETE"],
-    credentials:true
+    methods: ["POST", "GET", "PUT", "PATCH", "DELETE"],
+    credentials: true
 }))
 
 /////// middlewares
