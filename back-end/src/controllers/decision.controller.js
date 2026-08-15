@@ -54,13 +54,22 @@ export const makeDecision = expressAsyncHandler(async (req, res) => {
             })
         });
 
-        const data = await aiResponse.json();
+        let data;
+        try {
+            data = await aiResponse.json();
+        } catch (e) {
+            data = { detail: await aiResponse.text() };
+        }
 
         if (!aiResponse.ok) {
+            const detailMsg =
+                typeof data.detail === "string"
+                    ? data.detail
+                    : data.message || JSON.stringify(data.detail || data);
             return res.status(aiResponse.status).json({
-                status: 'fail',
-                message: data.detail || 'AI engine error',
-                data: null
+                status: "fail",
+                message: detailMsg || "AI engine error",
+                data: null,
             });
         }
 
