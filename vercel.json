@@ -1,5 +1,13 @@
 {
   "version": 2,
+  "functions": {
+    "back-end/src/app.js": {
+      "maxDuration": 60
+    },
+    "ai/api/index.py": {
+      "maxDuration": 60
+    }
+  },
   "builds": [
     {
       "src": "front-end/package.json",
