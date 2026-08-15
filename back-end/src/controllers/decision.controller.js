@@ -24,9 +24,18 @@ export const makeDecision = expressAsyncHandler(async (req, res) => {
         });
     }
 
-    let aiEndpoint = process.env.AI_API_URL || 'http://localhost:8000/decide';
+    let aiEndpoint = process.env.AI_API_URL || '';
+
+    if (!aiEndpoint) {
+        if (process.env.VERCEL || process.env.NODE_ENV === 'production' || req.headers.host?.includes('vercel.app')) {
+            aiEndpoint = '/decide';
+        } else {
+            aiEndpoint = 'http://localhost:8000/decide';
+        }
+    }
+
     if (aiEndpoint.startsWith('/')) {
-        const protocol = req.headers['x-forwarded-proto'] || req.protocol || 'http';
+        const protocol = req.headers['x-forwarded-proto'] || req.protocol || 'https';
         const host = req.headers.host || 'localhost:5000';
         aiEndpoint = `${protocol}://${host}${aiEndpoint}`;
     }

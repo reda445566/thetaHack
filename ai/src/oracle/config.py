@@ -51,6 +51,8 @@ def get_decision_memory_database_url() -> str:
     """Return the configured decision-memory database URL."""
     if settings.DECISION_MEMORY_DATABASE_URL:
         return settings.DECISION_MEMORY_DATABASE_URL
+    if os.environ.get("VERCEL"):
+        return "sqlite:////tmp/oracle_memory.sqlite3"
     return f"sqlite:///{settings.DECISION_MEMORY_DB_PATH}"
 
 
